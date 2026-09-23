@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support in Prisma; these are stored as strings and
+// modeled as unions in server/src/types.ts. Values map 1:1 to real Postgres
+// enums when this schema is ported.
+// Role: "ALUMNUS" | "STAFF"
+// Visibility: "PRIVATE" | "NETWORK_ONLY" | "PUBLIC"
+// OpportunityType: "SCHOLARSHIP" | "JOB" | "INTERNSHIP" | "TRAINING" | "GRANT" | "EVENT" | "OTHER"
+// MentorshipStatus: "REQUESTED" | "ACCEPTED" | "DECLINED"
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String?
+  role         String   @default("ALUMNUS")
+  claimCode    String?  @unique
+  isClaimed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  profile Profile?
+
+  postedOpportunities Opportunity[] @relation("PostedBy")
+  auditLogsAsStaff    AuditLog[]    @relation("StaffActor")
+  auditLogsAsTarget   AuditLog[]    @relation("TargetUser")
+}
+
+model Profile {
+  id        String @id @default(uuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // REF-verified fields (staff-editable only)
+  firstName  String
+  lastName   String
+  country    String
+  refProgram String
+  cohortYear Int
+  verifiedAt DateTime?
+
+  // User-maintained fields
+  profession     String?
+  skills         String  @default("[]") // JSON string array
+  bio            String?
+  currentLocation String?
+  languages      String  @default("[]") // JSON string array
+  contactEmail   String?
+  contactVisible Boolean @default(false)
+
+  mentorAvailable  Boolean @default(false)
+  mentorCategories String  @default("[]") // JSON string array
+  seekingMentor    Boolean @default(false)
+  seekingCategories String @default("[]") // JSON string array
+
+  visibility     String @default("NETWORK_ONLY")
+  fieldVisibility String    @default("{}") // JSON object of field -> Visibility
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mentorConnections  MentorshipConnection[] @relation("MentorProfile")
+  menteeConnections  MentorshipConnection[] @relation("MenteeProfile")
+  sentMessages       Message[]               @relation("SenderProfile")
+  receivedMessages   Message[]               @relation("RecipientProfile")
+}
+
+model Opportunity {
+  id          String          @id @default(uuid())
+  title       String
+  description String
+  type        String
+  country     String
+  deadline    DateTime
+  url         String?
+  postedByStaffId String
+  postedByStaff   User @relation("PostedBy", fields: [postedByStaffId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model MentorshipConnection {
+  id              String           @id @default(uuid())
+  mentorProfileId String
+  mentorProfile   Profile          @relation("MentorProfile", fields: [mentorProfileId], references: [id], onDelete: Cascade)
+  menteeProfileId String
+  menteeProfile   Profile          @relation("MenteeProfile", fields: [menteeProfileId], references: [id], onDelete: Cascade)
+  category        String
+  status           String @default("REQUESTED")
+  createdAt        DateTime         @default(now())
+}
+
+model Message {
+  id               String   @id @default(uuid())
+  senderProfileId  String
+  senderProfile    Profile  @relation("SenderProfile", fields: [senderProfileId], references: [id], onDelete: Cascade)
+  recipientProfileId String
+  recipientProfile Profile  @relation("RecipientProfile", fields: [recipientProfileId], references: [id], onDelete: Cascade)
+  body             String
+  sentAt           DateTime @default(now())
+  readAt           DateTime?
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  staffUserId  String
+  staffUser    User     @relation("StaffActor", fields: [staffUserId], references: [id])
+  action       String
+  targetUserId String
+  targetUser   User     @relation("TargetUser", fields: [targetUserId], references: [id])
+  details      String?
+  createdAt    DateTime @default(now())
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model DirectorySearchEvent {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+}
