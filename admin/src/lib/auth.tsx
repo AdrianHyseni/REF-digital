@@ -2,8 +2,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { api, getToken, setToken, ApiError } from './api';
 import type { Role } from './types';
 
-const ADMIN_URL = import.meta.env.VITE_ADMIN_URL ?? 'http://localhost:5174';
-
 interface AuthUser {
   id: string;
   email: string;
@@ -15,7 +13,6 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
-  claim: (claimCode: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
 }
 
@@ -40,17 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(email: string, password: string) {
     const result = await api.post<{ token: string; role: Role; email: string }>('/auth/login', { email, password });
-    if (result.role === 'STAFF') {
-      throw new ApiError(`REF staff should log in at the staff dashboard: ${ADMIN_URL}`, 403);
+    if (result.role !== 'STAFF') {
+      throw new ApiError('This login is for REF staff only. Alumni should use the member app.', 403);
     }
-    setToken(result.token);
-    const me = await api.get<AuthUser>('/auth/me');
-    setUser(me);
-    return me;
-  }
-
-  async function claim(claimCode: string, password: string) {
-    const result = await api.post<{ token: string; role: Role; email: string }>('/auth/claim', { claimCode, password });
     setToken(result.token);
     const me = await api.get<AuthUser>('/auth/me');
     setUser(me);
@@ -63,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, claim, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

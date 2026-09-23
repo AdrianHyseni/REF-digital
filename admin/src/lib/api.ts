@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'ref_network_token';
+const TOKEN_KEY = 'ref_network_admin_token';
 
 // In dev, requests go through the Vite proxy at a relative /api path. In a
 // Docker/production build, VITE_API_URL is baked in at build time to point

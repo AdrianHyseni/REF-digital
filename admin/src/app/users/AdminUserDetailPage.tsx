@@ -69,7 +69,7 @@ export default function AdminUserDetailPage() {
 
   return (
     <div className="max-w-3xl">
-      <Link to="/admin/users" className="text-sm text-gray-500 hover:text-gray-700">
+      <Link to="/users" className="text-sm text-gray-500 hover:text-gray-700">
         ← Back to users
       </Link>
       <h1 className="font-bold text-2xl mt-2 mb-1">

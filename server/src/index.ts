@@ -10,7 +10,13 @@ import { messagesRouter } from './routes/messages';
 import { adminRouter } from './routes/admin';
 
 const app = express();
-app.use(cors());
+
+// The web (alumni) and admin apps are separate projects/origins, so CORS
+// needs to allow cross-origin requests from both. Auth is Bearer-token based
+// (no cookies), so a wildcard origin carries no CSRF risk here. CORS_ORIGINS
+// can be set to a comma-separated allowlist to lock this down per environment.
+const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim());
+app.use(cors({ origin: allowedOrigins ?? true }));
 app.use(express.json());
 app.use(attachUser);
 

@@ -3,23 +3,42 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// SQLite has no native enum support in Prisma; these are stored as strings and
-// modeled as unions in server/src/types.ts. Values map 1:1 to real Postgres
-// enums when this schema is ported.
-// Role: "ALUMNUS" | "STAFF"
-// Visibility: "PRIVATE" | "NETWORK_ONLY" | "PUBLIC"
-// OpportunityType: "SCHOLARSHIP" | "JOB" | "INTERNSHIP" | "TRAINING" | "GRANT" | "EVENT" | "OTHER"
-// MentorshipStatus: "REQUESTED" | "ACCEPTED" | "DECLINED"
+enum Role {
+  ALUMNUS
+  STAFF
+}
+
+enum Visibility {
+  PRIVATE
+  NETWORK_ONLY
+  PUBLIC
+}
+
+enum OpportunityType {
+  SCHOLARSHIP
+  JOB
+  INTERNSHIP
+  TRAINING
+  GRANT
+  EVENT
+  OTHER
+}
+
+enum MentorshipStatus {
+  REQUESTED
+  ACCEPTED
+  DECLINED
+}
 
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
   passwordHash String?
-  role         String   @default("ALUMNUS")
+  role         Role     @default(ALUMNUS)
   claimCode    String?  @unique
   isClaimed    Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -58,8 +77,8 @@ model Profile {
   seekingMentor    Boolean @default(false)
   seekingCategories String @default("[]") // JSON string array
 
-  visibility     String @default("NETWORK_ONLY")
-  fieldVisibility String    @default("{}") // JSON object of field -> Visibility
+  visibility      Visibility @default(NETWORK_ONLY)
+  fieldVisibility String     @default("{}") // JSON object of field -> Visibility
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -74,7 +93,7 @@ model Opportunity {
   id          String          @id @default(uuid())
   title       String
   description String
-  type        String
+  type        OpportunityType
   country     String
   deadline    DateTime
   url         String?
@@ -84,14 +103,14 @@ model Opportunity {
 }
 
 model MentorshipConnection {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   mentorProfileId String
-  mentorProfile   Profile          @relation("MentorProfile", fields: [mentorProfileId], references: [id], onDelete: Cascade)
+  mentorProfile   Profile           @relation("MentorProfile", fields: [mentorProfileId], references: [id], onDelete: Cascade)
   menteeProfileId String
-  menteeProfile   Profile          @relation("MenteeProfile", fields: [menteeProfileId], references: [id], onDelete: Cascade)
+  menteeProfile   Profile           @relation("MenteeProfile", fields: [menteeProfileId], references: [id], onDelete: Cascade)
   category        String
-  status           String @default("REQUESTED")
-  createdAt        DateTime         @default(now())
+  status          MentorshipStatus  @default(REQUESTED)
+  createdAt       DateTime          @default(now())
 }
 
 model Message {

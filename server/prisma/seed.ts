@@ -1,18 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const Role = { ALUMNUS: 'ALUMNUS', STAFF: 'STAFF' } as const;
-const Visibility = { PRIVATE: 'PRIVATE', NETWORK_ONLY: 'NETWORK_ONLY', PUBLIC: 'PUBLIC' } as const;
-const OpportunityType = {
-  SCHOLARSHIP: 'SCHOLARSHIP',
-  JOB: 'JOB',
-  INTERNSHIP: 'INTERNSHIP',
-  TRAINING: 'TRAINING',
-  GRANT: 'GRANT',
-  EVENT: 'EVENT',
-  OTHER: 'OTHER',
-} as const;
-const MentorshipStatus = { REQUESTED: 'REQUESTED', ACCEPTED: 'ACCEPTED', DECLINED: 'DECLINED' } as const;
-type OpportunityType = (typeof OpportunityType)[keyof typeof OpportunityType];
+import { PrismaClient, Role, Visibility, OpportunityType, MentorshipStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 

@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
-import AdminLayout from './components/AdminLayout';
 
 import LoginPage from './app/onboarding/LoginPage';
 import ClaimPage from './app/onboarding/ClaimPage';
@@ -20,11 +19,6 @@ import OpportunitiesPage from './app/opportunities/OpportunitiesPage';
 import MessagesPage from './app/messages/MessagesPage';
 import ConversationPage from './app/messages/ConversationPage';
 
-import AdminUsersPage from './admin/users/AdminUsersPage';
-import AdminUserDetailPage from './admin/users/AdminUserDetailPage';
-import AdminOpportunitiesPage from './admin/content/AdminOpportunitiesPage';
-import AdminAnalyticsPage from './admin/analytics/AdminAnalyticsPage';
-
 export default function App() {
   const { user, loading } = useAuth();
 
@@ -32,13 +26,13 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={user ? (user.role === 'STAFF' ? '/admin/users' : '/app/profile') : '/login'} replace />} />
-      <Route path="/login" element={user ? <Navigate to={user.role === 'STAFF' ? '/admin/users' : '/app/profile'} replace /> : <LoginPage />} />
+      <Route path="/" element={<Navigate to={user ? '/app/profile' : '/login'} replace />} />
+      <Route path="/login" element={user ? <Navigate to="/app/profile" replace /> : <LoginPage />} />
       <Route path="/claim" element={user ? <Navigate to="/app/profile" replace /> : <ClaimPage />} />
       <Route
         path="/onboarding/complete-profile"
         element={
-          <ProtectedRoute role="ALUMNUS">
+          <ProtectedRoute>
             <CompleteProfilePage />
           </ProtectedRoute>
         }
@@ -47,7 +41,7 @@ export default function App() {
       <Route
         path="/app"
         element={
-          <ProtectedRoute role="ALUMNUS">
+          <ProtectedRoute>
             <AppLayout />
           </ProtectedRoute>
         }
@@ -61,21 +55,6 @@ export default function App() {
         <Route path="opportunities" element={<OpportunitiesPage />} />
         <Route path="messages" element={<MessagesPage />} />
         <Route path="messages/:profileId" element={<ConversationPage />} />
-      </Route>
-
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="STAFF">
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="users" replace />} />
-        <Route path="users" element={<AdminUsersPage />} />
-        <Route path="users/:id" element={<AdminUserDetailPage />} />
-        <Route path="opportunities" element={<AdminOpportunitiesPage />} />
-        <Route path="analytics" element={<AdminAnalyticsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

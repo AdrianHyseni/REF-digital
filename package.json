@@ -3,12 +3,13 @@
   "private": true,
   "workspaces": [
     "server",
-    "web"
+    "web",
+    "admin"
   ],
   "scripts": {
-    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w server\" \"npm run dev -w web\"",
+    "dev": "concurrently -n server,web,admin -c blue,green,magenta \"npm run dev -w server\" \"npm run dev -w web\" \"npm run dev -w admin\"",
     "seed": "npm run seed -w server",
-    "build": "npm run build -w server && npm run build -w web"
+    "build": "npm run build -w server && npm run build -w web && npm run build -w admin"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

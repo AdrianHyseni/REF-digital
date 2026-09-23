@@ -2,9 +2,9 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 const NAV = [
-  { to: '/admin/users', label: 'Users' },
-  { to: '/admin/opportunities', label: 'Opportunities' },
-  { to: '/admin/analytics', label: 'Analytics' },
+  { to: '/users', label: 'Users' },
+  { to: '/opportunities', label: 'Opportunities' },
+  { to: '/analytics', label: 'Analytics' },
 ];
 
 export default function AdminLayout() {

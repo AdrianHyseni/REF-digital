@@ -80,7 +80,7 @@ export default function AdminUsersPage() {
               {results.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <Link to={`/admin/users/${u.id}`} className="font-medium text-gray-900 hover:text-ref-red">
+                    <Link to={`/users/${u.id}`} className="font-medium text-gray-900 hover:text-ref-red">
                       {u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email}
                     </Link>
                     <div className="text-xs text-gray-400">{u.email}</div>
